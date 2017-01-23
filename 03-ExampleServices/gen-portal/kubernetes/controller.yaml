@@ -1,0 +1,20 @@
+kind: ReplicationController
+metadata:
+  name: portal
+  labels:
+    name: portal
+spec:
+  replicas: 1
+  selector:
+    name: portal
+  template:
+    metadata:
+      labels:
+        name: portal
+    spec:
+      containers:
+      - name: portal
+        image: my/portal
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080

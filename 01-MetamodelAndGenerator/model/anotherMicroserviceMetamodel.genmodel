@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/AnotherMicroserviceMetamodel/src" modelPluginID="AnotherMicroserviceMetamodel"
+    modelName="AnotherMicroserviceMetamodel" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    importerID="org.eclipse.emf.importer.ecore" complianceLevel="8.0" copyrightFields="false"
+    operationReflection="true" importOrganizing="true">
+  <foreignModel>anotherMicroserviceMetamodel.ecore</foreignModel>
+  <genPackages prefix="AnotherMicroserviceMetamodel" disposableProviderFactory="true"
+      ecorePackage="anotherMicroserviceMetamodel.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="anotherMicroserviceMetamodel.ecore#//RESTVerb">
+      <genEnumLiterals ecoreEnumLiteral="anotherMicroserviceMetamodel.ecore#//RESTVerb/GET"/>
+      <genEnumLiterals ecoreEnumLiteral="anotherMicroserviceMetamodel.ecore#//RESTVerb/PUT"/>
+      <genEnumLiterals ecoreEnumLiteral="anotherMicroserviceMetamodel.ecore#//RESTVerb/POST"/>
+      <genEnumLiterals ecoreEnumLiteral="anotherMicroserviceMetamodel.ecore#//RESTVerb/DELETE"/>
+    </genEnums>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//Microservice">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//Microservice/environment"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//Microservice/endpoints"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//Microservice/microserviceType"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//Microservice/version"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute anotherMicroserviceMetamodel.ecore#//Microservice/uuid"/>
+    </genClasses>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//Configuration">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//Configuration/microservices"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="anotherMicroserviceMetamodel.ecore#//ExecutionEnvironment">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//ExecutionEnvironment/microservices"/>
+    </genClasses>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//Version">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute anotherMicroserviceMetamodel.ecore#//Version/versionString"/>
+    </genClasses>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//Endpoint">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//Endpoint/restOperations"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute anotherMicroserviceMetamodel.ecore#//Endpoint/ipAddress"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute anotherMicroserviceMetamodel.ecore#//Endpoint/port"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute anotherMicroserviceMetamodel.ecore#//Endpoint/url"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute anotherMicroserviceMetamodel.ecore#//Endpoint/protocol"/>
+    </genClasses>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//RESTOperation">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute anotherMicroserviceMetamodel.ecore#//RESTOperation/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute anotherMicroserviceMetamodel.ecore#//RESTOperation/subPath"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute anotherMicroserviceMetamodel.ecore#//RESTOperation/restVerb"/>
+    </genClasses>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//MicroserviceType">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//MicroserviceType/restOperations"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//MicroserviceType/microservices"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//MicroserviceType/versions"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute anotherMicroserviceMetamodel.ecore#//MicroserviceType/identifier"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//MicroserviceType/dependencies"/>
+    </genClasses>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//MicroserviceRepository">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//MicroserviceRepository/microserviceTypes"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="anotherMicroserviceMetamodel.ecore#//Host">
+      <genFeatures children="true" createChild="true" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//Host/containers"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute anotherMicroserviceMetamodel.ecore#//Host/hostname"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="anotherMicroserviceMetamodel.ecore#//Container">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//Container/host"/>
+    </genClasses>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//VirtualHost">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//VirtualHost/parentHost"/>
+    </genClasses>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//PhysicalHost">
+      <genFeatures children="true" createChild="true" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//PhysicalHost/virtualHosts"/>
+    </genClasses>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//InfrastructureModel">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//InfrastructureModel/hosts"/>
+    </genClasses>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//DependencyModel">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//DependencyModel/operationToOperationCallingDependencies"/>
+    </genClasses>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//OperationToOperationCallingDependency">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//OperationToOperationCallingDependency/calledMicroservice"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//OperationToOperationCallingDependency/calledOperation"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//OperationToOperationCallingDependency/callingOperation"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//OperationToOperationCallingDependency/callingVersion"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//OperationToOperationCallingDependency/callingMicroservice"/>
+    </genClasses>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//TimeSeries">
+      <genFeatures children="true" createChild="true" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//TimeSeries/timeSeriesPoints"/>
+    </genClasses>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//TimeSeriesPoint">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//TimeSeriesPoint/timeSeries"/>
+    </genClasses>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//MicroserviceOperationTimeSeriesPoint">
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//MicroserviceOperationTimeSeriesPoint/endpoint"/>
+      <genFeatures property="None" notify="false" createChild="false" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//MicroserviceOperationTimeSeriesPoint/restOperation"/>
+    </genClasses>
+    <genClasses ecoreClass="anotherMicroserviceMetamodel.ecore#//MetaModelStructure">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//MetaModelStructure/infrastructure"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//MetaModelStructure/configurations"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//MetaModelStructure/dependencies"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//MetaModelStructure/timeSeries"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference anotherMicroserviceMetamodel.ecore#//MetaModelStructure/microserviceRepository"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

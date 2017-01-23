@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: jmeter
+  labels:
+    name: jmeter
+spec:
+  replicas: 1
+  selector:
+    name: jmeter
+  template:
+    metadata:
+      labels:
+        name: jmeter
+    spec:
+      containers:
+      - name: jmeter
+        image: my/jmeter
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 22

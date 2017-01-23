@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: jmsserver
+  labels:
+    name: jmsserver
+spec:
+  replicas: 1
+  selector:
+    name: jmsserver
+  template:
+    metadata:
+      labels:
+        name: jmsserver
+    spec:
+      containers:
+      - name: jmsserver
+        image: my/jmsserver
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8161
+        - containerPort: 61616
