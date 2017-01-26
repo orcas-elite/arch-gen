@@ -3,6 +3,8 @@
 This approach was developed during the work on a Master's Thesis on performance anomaly detection microservice architectures [1].
 It provides a model-driven approach to generate synthetic microservice architectures that can be used for evaluating performance  and resilience engineering approaches. Problem injection (e.g., delay) can also be injected.
 
+[1] available at www.iste.uni-stuttgart.de/rss/people/duellmann
+
 * **01-MetamodelAndGenerator**: Contains the Eclipse Ecore metamodel for microservice architectures and the corresponding generation tool implemented with Xtend. Furthermore, it contains some sample instances of the model.
 
 * **02-SupportingToolsAndScripts**: Contains supporting services and scripts that can be used for evaluating a generated microservice architecture.
