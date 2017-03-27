@@ -493,11 +493,11 @@ class EnvironmentGenerator {
 	'''
 
 	def genKiekerMonitoringPropertiesFile() '''
-	kieker.monitoring.writer=kieker.monitoring.writer.jms.AsyncJMSWriter
-	kieker.monitoring.writer.jms.AsyncJMSWriter.ProviderUrl=tcp://jmsserver:61616
-	kieker.monitoring.writer.jms.AsyncJMSWriter.Topic=kieker
-	kieker.monitoring.writer.jms.AsyncJMSWriter.ContextFactoryType=org.apache.activemq.jndi.ActiveMQInitialContextFactory
-	kieker.monitoring.writer.jms.AsyncJMSWriter.FactoryLookupName=ConnectionFactory
+	kieker.monitoring.writer=kieker.monitoring.writer.jms.JmsWriter
+	kieker.monitoring.writer.jms.JmsWriter.ProviderUrl=tcp://jmsserver:61616
+	kieker.monitoring.writer.jms.JmsWriter.Topic=kieker
+	kieker.monitoring.writer.jms.JmsWriter.ContextFactoryType=org.apache.activemq.jndi.ActiveMQInitialContextFactory
+	kieker.monitoring.writer.jms.JmsWriter.FactoryLookupName=ConnectionFactory
 	'''
 
 	def writeToFile(File file, String s) {
