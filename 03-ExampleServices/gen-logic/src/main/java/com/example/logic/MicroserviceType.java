@@ -4,11 +4,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import kieker.monitoring.probe.spring.flow.RestOutInterceptor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
 
@@ -69,7 +69,7 @@ public abstract class MicroserviceType {
     }
 	
 	@RequestMapping(value = "/login", method = GET)
-	public String doLogin() {
+	public ResponseEntity<String> doLogin() {
 		
 		Integer delay = requestDelay("doLogin");
 	try {
@@ -79,11 +79,10 @@ public abstract class MicroserviceType {
 	}
 		
 	restTemplate.getForObject("http://database:8080/login", String.class);
-	
-		return "Operation doLogin executed successfully.";
+		return new ResponseEntity<String>("Operation doLogin executed successfully.", HttpStatus.OK);
 	}
 	@RequestMapping(value = "/order", method = GET)
-	public String doOrder() {
+	public ResponseEntity<String> doOrder() {
 		
 		Integer delay = requestDelay("doOrder");
 	try {
@@ -93,7 +92,6 @@ public abstract class MicroserviceType {
 	}
 		
 	restTemplate.getForObject("http://database:8080/order", String.class);
-	
-		return "Operation doOrder executed successfully.";
+		return new ResponseEntity<String>("Operation doOrder executed successfully.", HttpStatus.OK);
 	}
 }

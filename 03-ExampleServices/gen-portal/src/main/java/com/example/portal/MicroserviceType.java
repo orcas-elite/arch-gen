@@ -4,11 +4,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import kieker.monitoring.probe.spring.flow.RestOutInterceptor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
 
@@ -69,7 +69,7 @@ public abstract class MicroserviceType {
     }
 	
 	@RequestMapping(value = "/", method = GET)
-	public String getIndex() {
+	public ResponseEntity<String> getIndex() {
 		
 		Integer delay = requestDelay("getIndex");
 	try {
@@ -78,10 +78,10 @@ public abstract class MicroserviceType {
 		System.out.println("Exception occurred while trying to inject delay of " + delay + ". (" + ie.getMessage() + ")");
 	}
 		
-		return "Operation getIndex executed successfully.";
+		return new ResponseEntity<String>("Operation getIndex executed successfully.", HttpStatus.OK);
 	}
 	@RequestMapping(value = "/login", method = GET)
-	public String getLogin() {
+	public ResponseEntity<String> getLogin() {
 		
 		Integer delay = requestDelay("getLogin");
 	try {
@@ -91,11 +91,10 @@ public abstract class MicroserviceType {
 	}
 		
 	restTemplate.getForObject("http://logic:8080/login", String.class);
-	
-		return "Operation getLogin executed successfully.";
+		return new ResponseEntity<String>("Operation getLogin executed successfully.", HttpStatus.OK);
 	}
 	@RequestMapping(value = "/order", method = GET)
-	public String getOrder() {
+	public ResponseEntity<String> getOrder() {
 		
 		Integer delay = requestDelay("getOrder");
 	try {
@@ -105,7 +104,6 @@ public abstract class MicroserviceType {
 	}
 		
 	restTemplate.getForObject("http://logic:8080/order", String.class);
-	
-		return "Operation getOrder executed successfully.";
+		return new ResponseEntity<String>("Operation getOrder executed successfully.", HttpStatus.OK);
 	}
 }

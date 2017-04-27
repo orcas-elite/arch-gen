@@ -1,14 +1,11 @@
 package com.example.portal;
 
-import java.util.concurrent.TimeUnit;
-
-import kieker.monitoring.core.controller.IMonitoringController;
-import kieker.monitoring.core.controller.MonitoringController;
-import kieker.monitoring.probe.spring.flow.RestInInterceptor;
+import kieker.monitoring.probe.spring.flow.RestInFilter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @SpringBootApplication
@@ -18,9 +15,11 @@ public class MicroserviceApplication extends WebMvcConfigurerAdapter {
 	public static void main(String[] args) {
 		SpringApplication.run(MicroserviceApplication.class, args);
 	}
-	
-	@Override
-	public void addInterceptors(final InterceptorRegistry registry) {
-		registry.addInterceptor(new RestInInterceptor());
-	}
+
+	@Bean
+    public FilterRegistrationBean inRequestFilter() {
+        final FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.setFilter(new RestInFilter());
+        return registration;
+    }
 }

@@ -65,7 +65,7 @@ public class RestOutInterceptor implements ClientHttpRequestInterceptor {
 		// Get request header
 		final HttpHeaders headers = request.getHeaders();
 
-		headers.add("KiekerTracingInfo", Long.toString(traceId) + "," + sessionId + "," + Integer.toString(eoi) + "," + Integer.toString(nextESS));
+		headers.add(RestInterceptorConstants.HEADER_FIELD, Long.toString(traceId) + "," + sessionId + "," + Integer.toString(eoi) + "," + Integer.toString(nextESS));
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Sending request to " + request.getURI().toString() + " with header = " + headers.toString());
@@ -86,7 +86,7 @@ public class RestOutInterceptor implements ClientHttpRequestInterceptor {
 				final ClientHttpResponse response = (ClientHttpResponse) retval;
 				final HttpHeaders responseHeaders = response.getHeaders();
 				if (responseHeaders != null) {
-					final List<String> responseHeaderList = responseHeaders.get("KiekerTracingInfo");
+					final List<String> responseHeaderList = responseHeaders.get(RestInterceptorConstants.HEADER_FIELD);
 
 					if (responseHeaderList != null) {
 						if (LOG.isDebugEnabled()) {

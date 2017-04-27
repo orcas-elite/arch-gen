@@ -40,14 +40,12 @@ class EnvironmentGenerator {
 			createMicroserviceFile(projectDir, mst, ms);
 			createSpringbootInitFile(projectDir, mst);
 			createOutInterceptorFile(projectDir);
-			createInInterceptorFile(projectDir);
+			createInFilterFile(projectDir);
 			createRestInterceptorConstantsFile(projectDir);
-			createThreadSpecificInterceptedDataFile(projectDir);
 			createPomFile(projectDir, mst, ms);
 			createAopSettingsFile(projectDir);
 			createDockerfile(projectDir, mst.identifier + "-" + ms.version.versionString);
-			createKubernetesService(projectDir, mst, ms);
-			createKubernetesController(projectDir, mst, ms);
+			createKubernetesFile(projectDir, mst, ms);
 			createKiekerMonitoringPropertiesFile(projectDir);
 			createMicroserviceBaseInfoFile(projectDir, mst);
 			createMicroserviceRegistrationInfoFile(projectDir, mst);
@@ -84,14 +82,9 @@ class EnvironmentGenerator {
 		writeToFile(file, genMicroserviceContent(mst, ms).toString());
 	}
 	
-	def createKubernetesService(File dir, MicroserviceType mst, Microservice ms) {
-		val file = new File(dir.path + "/kubernetes/service.yaml");
-		writeToFile(file, genKubernetesServiceFile(mst, ms).toString());
-	}
-	
-	def createKubernetesController(File dir, MicroserviceType mst, Microservice ms) {
-		val file = new File(dir.path + "/kubernetes/controller.yaml");
-		writeToFile(file, genKubernetesControllerFile(mst, ms).toString());
+	def createKubernetesFile(File dir, MicroserviceType mst, Microservice ms) {
+		val file = new File(dir.path + "/kubernetes.yaml");
+		writeToFile(file, genKubernetesFile(mst, ms).toString());
 	}
 
 	def createOutInterceptorFile(File dir) {
@@ -99,19 +92,14 @@ class EnvironmentGenerator {
 		writeToFile(file, genOutInterceptor().toString());
 	}
 	
-	def createInInterceptorFile(File dir) {
-		val file = new File(dir.path + "/src/main/java/kieker/monitoring/probe/spring/flow/RestInInterceptor.java");
-		writeToFile(file, genInInterceptor().toString());
+	def createInFilterFile(File dir) {
+		val file = new File(dir.path + "/src/main/java/kieker/monitoring/probe/spring/flow/RestInFilter.java");
+		writeToFile(file, genInFilter().toString());
 	}
 
 	def createRestInterceptorConstantsFile(File dir) {
 		val file = new File(dir.path + "/src/main/java/kieker/monitoring/probe/spring/flow/RestInterceptorConstants.java");
 		writeToFile(file, genRestInterceptorConstants().toString());
-	}
-	
-	def createThreadSpecificInterceptedDataFile(File dir) {
-		val file = new File(dir.path + "/src/main/java/kieker/monitoring/probe/spring/flow/ThreadSpecificInterceptedData.java");
-		writeToFile(file, genThreadSpecificInterceptedDataContent().toString());
 	}
 	
 	def createMicroserviceBaseInfoFile(File dir, MicroserviceType mst) {
@@ -134,7 +122,6 @@ class EnvironmentGenerator {
 		new File(projectDir.path + "/src/main/java/com/example/" + projectName).mkdirs();
 		new File(projectDir.path + "/src/main/java/kieker/monitoring/probe/spring/flow").mkdirs();
 		new File(projectDir.path + "/src/main/resources/META-INF").mkdirs();
-		new File(projectDir.path + "/kubernetes").mkdir();
 		return projectDir;
 	}
 
@@ -145,11 +132,11 @@ class EnvironmentGenerator {
 		import java.lang.reflect.Method;
 		import java.util.ArrayList;
 		import java.util.Collections;
-		import java.util.HashMap;
 		import java.util.List;
-		import java.util.Map;
 		
 		import kieker.monitoring.probe.spring.flow.RestOutInterceptor;
+		import org.springframework.http.HttpStatus;
+		import org.springframework.http.ResponseEntity;
 		import org.springframework.web.bind.annotation.RequestMapping;
 		import org.springframework.web.client.RestTemplate;
 		
@@ -211,7 +198,7 @@ class EnvironmentGenerator {
 			
 			«FOR operation : mst.restOperations»
 				@RequestMapping(value = "«operation.subPath»", method = «operation.restVerb.toString»)
-				public String «operation.name»() {
+				public ResponseEntity<String> «operation.name»() {
 					
 					Integer delay = requestDelay("«operation.name»");
 				try {
@@ -224,11 +211,10 @@ class EnvironmentGenerator {
 					«IF otocd.callingOperation.name == operation.name»
 						«IF otocd.callingVersion == ms.version»					
 							restTemplate.getForObject("http://«otocd.calledMicroservice.identifier»:8080«otocd.calledOperation.subPath»", String.class);
-							
 						«ENDIF»
 					«ENDIF»
 				«ENDFOR»
-					return "Operation «operation.name» executed successfully.";
+					return new ResponseEntity<String>("Operation «operation.name» executed successfully.", HttpStatus.OK);
 				}
 			«ENDFOR»
 		}
@@ -256,15 +242,12 @@ class EnvironmentGenerator {
 	def genMicroserviceApplicationContent(MicroserviceType mst) '''
 		package com.example.«mst.identifier»;
 		
-		import java.util.concurrent.TimeUnit;
-		
-		import kieker.monitoring.core.controller.IMonitoringController;
-		import kieker.monitoring.core.controller.MonitoringController;
-		import kieker.monitoring.probe.spring.flow.RestInInterceptor;
+		import kieker.monitoring.probe.spring.flow.RestInFilter;
 		import org.springframework.boot.SpringApplication;
 		import org.springframework.boot.autoconfigure.SpringBootApplication;
+		import org.springframework.boot.web.servlet.FilterRegistrationBean;
+		import org.springframework.context.annotation.Bean;
 		import org.springframework.context.annotation.ImportResource;
-		import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 		import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 		
 		@SpringBootApplication
@@ -274,11 +257,13 @@ class EnvironmentGenerator {
 			public static void main(String[] args) {
 				SpringApplication.run(MicroserviceApplication.class, args);
 			}
-			
-			@Override
-			public void addInterceptors(final InterceptorRegistry registry) {
-				registry.addInterceptor(new RestInInterceptor());
-			}
+		
+			@Bean
+		    public FilterRegistrationBean inRequestFilter() {
+		        final FilterRegistrationBean registration = new FilterRegistrationBean();
+		        registration.setFilter(new RestInFilter());
+		        return registration;
+		    }
 		}
 	'''
 	
@@ -418,12 +403,6 @@ class EnvironmentGenerator {
 				    <artifactId>spring-boot-starter-activemq</artifactId>
 				</dependency>
 				
-				<dependency>
-				    <groupId>org.hyperic</groupId>
-				    <artifactId>sigar</artifactId>
-				    <version>1.6.5.132-6</version>
-				</dependency>
-				
 		    </dependencies>
 		    
 		    <build>
@@ -447,26 +426,7 @@ class EnvironmentGenerator {
 		CMD java -Dorg.apache.activemq.SERIALIZABLE_PACKAGES=* -jar «nameVersion».jar
 	'''
 	
-	//      
-	def genKubernetesServiceFile(MicroserviceType mst, Microservice ms) '''
-	apiVersion: v1
-	kind: Service
-	metadata:
-	  name: «mst.identifier»
-	  labels:
-	    name: «mst.identifier»
-	spec:
-	  type: NodePort
-	  ports:
-	  «FOR Endpoint ep : ms.endpoints»
-	    - port: «ep.port»
-	      name: «ep.protocol.toLowerCase»
-	  «ENDFOR»
-	  selector: 
-	    name: «mst.identifier»
-	'''
-	
-	def genKubernetesControllerFile(MicroserviceType mst, Microservice ms) '''
+	def genKubernetesFile(MicroserviceType mst, Microservice ms) '''
 	apiVersion: v1
 	kind: ReplicationController
 	metadata:
@@ -490,6 +450,22 @@ class EnvironmentGenerator {
 	        «FOR Endpoint ep : ms.endpoints»
 	        - containerPort: «ep.port»
 	        «ENDFOR»
+	---
+	apiVersion: v1
+	kind: Service
+	metadata:
+	  name: «mst.identifier»
+	  labels:
+	    name: «mst.identifier»
+	spec:
+	  type: NodePort
+	  ports:
+	  «FOR Endpoint ep : ms.endpoints»
+	    - port: «ep.port»
+	      name: «ep.protocol.toLowerCase»
+	  «ENDFOR»
+	  selector: 
+	    name: «mst.identifier»
 	'''
 
 	def genKiekerMonitoringPropertiesFile() '''
@@ -574,7 +550,7 @@ class EnvironmentGenerator {
 			// Get request header
 			final HttpHeaders headers = request.getHeaders();
 	
-			headers.add("KiekerTracingInfo", Long.toString(traceId) + "," + sessionId + "," + Integer.toString(eoi) + "," + Integer.toString(nextESS));
+			headers.add(RestInterceptorConstants.HEADER_FIELD, Long.toString(traceId) + "," + sessionId + "," + Integer.toString(eoi) + "," + Integer.toString(nextESS));
 	
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Sending request to " + request.getURI().toString() + " with header = " + headers.toString());
@@ -595,7 +571,7 @@ class EnvironmentGenerator {
 					final ClientHttpResponse response = (ClientHttpResponse) retval;
 					final HttpHeaders responseHeaders = response.getHeaders();
 					if (responseHeaders != null) {
-						final List<String> responseHeaderList = responseHeaders.get("KiekerTracingInfo");
+						final List<String> responseHeaderList = responseHeaders.get(RestInterceptorConstants.HEADER_FIELD);
 	
 						if (responseHeaderList != null) {
 							if (LOG.isDebugEnabled()) {
@@ -664,14 +640,8 @@ class EnvironmentGenerator {
 	}
 	'''
 	
-	def genInInterceptor() '''
+	def genInFilter() '''
 	package kieker.monitoring.probe.spring.flow;
-	
-	import java.util.Collections;
-	import java.util.List;
-	
-	import javax.servlet.http.HttpServletRequest;
-	import javax.servlet.http.HttpServletResponse;
 	
 	import kieker.common.logging.Log;
 	import kieker.common.logging.LogFactory;
@@ -680,125 +650,168 @@ class EnvironmentGenerator {
 	import kieker.monitoring.core.controller.MonitoringController;
 	import kieker.monitoring.core.registry.ControlFlowRegistry;
 	import kieker.monitoring.core.registry.SessionRegistry;
+	import kieker.monitoring.probe.IMonitoringProbe;
+	import kieker.monitoring.probe.servlet.SessionAndTraceRegistrationFilter;
 	import kieker.monitoring.timer.ITimeSource;
-	import org.springframework.web.servlet.mvc.WebContentInterceptor;
+	import org.apache.log4j.Logger;
+	import org.springframework.web.filter.OncePerRequestFilter;
 	
-	public class RestInInterceptor extends WebContentInterceptor {
+	import javax.servlet.Filter;
+	import javax.servlet.FilterChain;
+	import javax.servlet.ServletException;
+	import javax.servlet.http.HttpServletRequest;
+	import javax.servlet.http.HttpServletResponse;
+	import javax.servlet.http.HttpServletResponseWrapper;
+	import java.io.IOException;
+	import java.util.Collections;
+	import java.util.List;
+	import java.util.concurrent.atomic.AtomicLong;
+	import java.util.concurrent.atomic.AtomicReference;
 	
-		public static final String SESSION_ID_ASYNC_TRACE = "NOSESSION-ASYNCIN";
 	
-		private static Log LOG = LogFactory.getLog(RestInInterceptor.class);
+	public class RestInFilter extends OncePerRequestFilter implements Filter, IMonitoringProbe  {
 	
-		private static final IMonitoringController CTRLINST = MonitoringController.getInstance();
-		private static final ITimeSource TIME = CTRLINST.getTimeSource();
-		private static final String VMNAME = CTRLINST.getHostname();
-		private static final ControlFlowRegistry CF_REGISTRY = ControlFlowRegistry.INSTANCE;
-		private static final SessionRegistry SESSION_REGISTRY = SessionRegistry.INSTANCE;
+	    public static final String SESSION_ID_ASYNC_TRACE = "NOSESSION-ASYNCIN";
 	
-		private ThreadLocal<ThreadSpecificInterceptedData> threadSpecificInterceptedData = new ThreadLocal<ThreadSpecificInterceptedData>();
+	    protected static final IMonitoringController MONITORING_CTRL = MonitoringController.getInstance();
+	    protected static final SessionRegistry SESSION_REGISTRY = SessionRegistry.INSTANCE;
+	    protected static final ControlFlowRegistry CF_REGISTRY = ControlFlowRegistry.INSTANCE;
 	
-		@Override
-		public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) {
+	    protected static final ITimeSource TIMESOURCE = MONITORING_CTRL.getTimeSource();
+	    protected static final String VM_NAME = MONITORING_CTRL.getHostname();
 	
-	        String signature;
-	        String sessionId = SESSION_REGISTRY.recallThreadLocalSessionId();
-	        long traceId = -1L;
+	    private static final Log LOG = LogFactory.getLog(SessionAndTraceRegistrationFilter.class);
+	
+	    @Override
+	    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
+	        final String signature;
+	        final AtomicReference<String> sessionId = new AtomicReference<String>(SESSION_REGISTRY.recallThreadLocalSessionId());
+	        final AtomicLong traceId = new AtomicLong(-1);
 	        long tin;
-	        final String hostname = VMNAME;
+	        final String hostname = VM_NAME;
 	        int eoi;
 	        int ess;
 	
-			if (!CTRLINST.isMonitoringEnabled()) {
-				return true;
-			}
-			
-			signature = "public void com.example.intercept.in.RestInInterceptor.interceptIncoming" + request.getMethod() + "Request()";
+	        if (!MONITORING_CTRL.isMonitoringEnabled()) {
+	            filterChain.doFilter(httpServletRequest, httpServletResponse);
+	            return;
+	        }
 	
-			final List<String> requestRestHeader = Collections.list(request.getHeaders(RestInterceptorConstants.HEADER_FIELD));
+	        signature = "public void com.example.intercept.in.RestInInterceptor.interceptIncoming" + httpServletRequest.getMethod() + "Request()";
 	
-			if ((requestRestHeader == null) || (requestRestHeader.isEmpty())) {
-				LOG.debug("No monitoring data found in the incoming request header");
-				// LOG.info("Will continue without sending back reponse header");
-				traceId = CF_REGISTRY.getAndStoreUniqueThreadLocalTraceId();
-				CF_REGISTRY.storeThreadLocalEOI(0);
-				CF_REGISTRY.storeThreadLocalESS(1); // next operation is ess + 1
-				eoi = 0;
-				ess = 0;
-			} else {
-				final String operationExecutionHeader = requestRestHeader.get(0);
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("Received request: " + request.getRequestURI() + "with header = " + requestRestHeader.toString());
-				}
-				final String[] headerArray = operationExecutionHeader.split(",");
+	        final List<String> requestRestHeader = Collections.list(httpServletRequest.getHeaders(RestInterceptorConstants.HEADER_FIELD));
 	
-				// Extract session id
-				sessionId = headerArray[1];
-				if ("null".equals(sessionId)) {
-					sessionId = OperationExecutionRecord.NO_SESSION_ID;
-				}
+	        if ((requestRestHeader == null) || (requestRestHeader.isEmpty())) {
+	            LOG.debug("No monitoring data found in the incoming request header");
+	            // LOG.info("Will continue without sending back reponse header");
+	            traceId.set(CF_REGISTRY.getAndStoreUniqueThreadLocalTraceId());
+	            CF_REGISTRY.storeThreadLocalEOI(0);
+	            CF_REGISTRY.storeThreadLocalESS(1); // next operation is ess + 1
+	            eoi = 0;
+	            ess = 0;
+	        } else {
+	            final String operationExecutionHeader = requestRestHeader.get(0);
+	            if (LOG.isDebugEnabled()) {
+	                LOG.info("Received request: " + httpServletRequest.getRequestURI() + "with header = " + requestRestHeader.toString());
+	            }
+	            final String[] headerArray = operationExecutionHeader.split(",");
 	
-				// Extract EOI
-				final String eoiStr = headerArray[2];
-				eoi = -1;
-				try {
-					eoi = 1 + Integer.parseInt(eoiStr);
-				} catch (final NumberFormatException exc) {
-					LOG.warn("Invalid eoi", exc);
-				}
+	            // Extract session id
+	            sessionId.set(headerArray[1]);
+	            if ("null".equals(sessionId.get())) {
+	                sessionId.set(OperationExecutionRecord.NO_SESSION_ID);
+	            }
 	
-				// Extract ESS
-				final String essStr = headerArray[3];
-				ess = -1;
-				try {
-					ess = Integer.parseInt(essStr);
-				} catch (final NumberFormatException exc) {
-					LOG.warn("Invalid ess", exc);
-				}
+	            // Extract EOI
+	            final String eoiStr = headerArray[2];
+	            eoi = -1;
+	            try {
+	                eoi = 1 + Integer.parseInt(eoiStr);
+	            } catch (final NumberFormatException exc) {
+	                LOG.warn("Invalid eoi", exc);
+	            }
 	
-				// Extract trace id
-				final String traceIdStr = headerArray[0];
-				if (traceIdStr != null) {
-					try {
-						traceId = Long.parseLong(traceIdStr);
-					} catch (final NumberFormatException exc) {
-						LOG.warn("Invalid trace id", exc);
-					}
-				} else {
-					traceId = CF_REGISTRY.getUniqueTraceId();
-					sessionId = SESSION_ID_ASYNC_TRACE;
-					eoi = 0; // EOI of this execution
-					ess = 0; // ESS of this execution
-				}
+	            // Extract ESS
+	            final String essStr = headerArray[3];
+	            ess = -1;
+	            try {
+	                ess = Integer.parseInt(essStr);
+	            } catch (final NumberFormatException exc) {
+	                LOG.warn("Invalid ess", exc);
+	            }
 	
-				// Store thread-local values
-				CF_REGISTRY.storeThreadLocalTraceId(traceId);
-				CF_REGISTRY.storeThreadLocalEOI(eoi); // this execution has EOI=eoi; next execution will get eoi with incrementAndRecall
-				CF_REGISTRY.storeThreadLocalESS(ess + 1); // this execution has ESS=ess
-				SESSION_REGISTRY.storeThreadLocalSessionId(sessionId);
-			}
+	            // Extract trace id
+	            final String traceIdStr = headerArray[0];
+	            if (traceIdStr != null) {
+	                try {
+	                    traceId.set(Long.parseLong(traceIdStr));
+	                } catch (final NumberFormatException exc) {
+	                    LOG.warn("Invalid trace id", exc);
+	                }
+	            } else {
+	                traceId.set(CF_REGISTRY.getUniqueTraceId());
+	                sessionId.set(SESSION_ID_ASYNC_TRACE);
+	                eoi = 0; // EOI of this execution
+	                ess = 0; // ESS of this execution
+	            }
 	
-			// measure before
-			tin = TIME.getTime();
+	            // Store thread-local values
+	            CF_REGISTRY.storeThreadLocalTraceId(traceId.get());
+	            CF_REGISTRY.storeThreadLocalEOI(eoi); // this execution has EOI=eoi; next execution will get eoi with incrementAndRecall
+	            CF_REGISTRY.storeThreadLocalESS(ess + 1); // this execution has ESS=ess
+	            SESSION_REGISTRY.storeThreadLocalSessionId(sessionId.get());
+	        }
 	
-			threadSpecificInterceptedData.set(new ThreadSpecificInterceptedData(signature, sessionId, traceId, tin, hostname, eoi, ess));
-			response.setHeader(RestInterceptorConstants.HEADER_FIELD, traceId + "," + sessionId + "," + (eoi+1) + "," + Integer.toString(CF_REGISTRY.recallThreadLocalESS()));
+	        tin = TIMESOURCE.getTime(); // the entry timestamp
 	
-			return true;
-		}
 	
-		@Override
-		public void afterCompletion(final HttpServletRequest request, final HttpServletResponse response, final Object handler, final Exception exception) {
-			// measure after
-			final long tout = TIME.getTime();
+	        HttpServletResponseWrapper wrapper = new HttpServletResponseWrapper(httpServletResponse) {
 	
-			final ThreadSpecificInterceptedData tsid = threadSpecificInterceptedData.get();
-			CTRLINST.newMonitoringRecord(new OperationExecutionRecord(tsid.getSignature(), tsid.getSessionId(), tsid.getTraceId(), tsid.getTin(), tout, tsid.getHostname(), tsid.getEoi(), tsid.getEss()));
-			
-			// cleanup
-			CF_REGISTRY.unsetThreadLocalTraceId();
-			CF_REGISTRY.unsetThreadLocalEOI();
-			CF_REGISTRY.unsetThreadLocalESS();
-		}
+	            @Override
+	            public void setStatus(int sc) {
+	                super.setStatus(sc);
+	                handleStatus(sc);
+	            }
+	
+	            @Override
+	            @SuppressWarnings("deprecation")
+	            public void setStatus(int sc, String sm) {
+	                super.setStatus(sc, sm);
+	                handleStatus(sc);
+	            }
+	            @Override
+	            public void sendError(int sc, String msg) throws IOException {
+	                super.sendError(sc, msg);
+	                handleStatus(sc);
+	            }
+	            @Override
+	            public void sendError(int sc) throws IOException {
+	                super.sendError(sc);
+	                handleStatus(sc);
+	            }
+	            private void handleStatus(int code) {
+	                addHeader(RestInterceptorConstants.HEADER_FIELD, traceId + "," + sessionId + "," + CF_REGISTRY.recallThreadLocalEOI() + "," + Integer.toString(CF_REGISTRY.recallThreadLocalESS()));
+	            }
+	        };
+	
+	
+	        try {
+	            filterChain.doFilter(httpServletRequest, wrapper);
+	        } finally {
+	            SESSION_REGISTRY.unsetThreadLocalSessionId();
+	
+	            final long tout = TIMESOURCE.getTime();
+	
+	            // Log this execution
+	            MONITORING_CTRL.newMonitoringRecord(
+	                    new OperationExecutionRecord(signature, sessionId.get(), traceId.get(), tin, tout, hostname, eoi, ess));
+	
+	            // Reset the thread-local trace information
+	            CF_REGISTRY.unsetThreadLocalTraceId();
+	            CF_REGISTRY.unsetThreadLocalEOI();
+	            CF_REGISTRY.unsetThreadLocalESS();
+	        }
+	    }
 	}
 	'''
 
@@ -807,59 +820,6 @@ class EnvironmentGenerator {
 	
 	public class RestInterceptorConstants {
 		public static final String HEADER_FIELD = "KiekerTracingInfo";
-	}
-	'''
-	
-	def genThreadSpecificInterceptedDataContent() '''
-	package kieker.monitoring.probe.spring.flow;
-	
-	public class ThreadSpecificInterceptedData {
-	
-	    private String signature;
-	    private String sessionId;
-	    private long traceId;
-	    private long tin;
-	    private String hostname;
-	    private int eoi;
-	    private int ess;
-	
-	    public ThreadSpecificInterceptedData(String signature, String sessionId, long traceId, long tin, final String hostname, int eoi, int ess) {
-	        this.signature = signature;
-	        this.sessionId = sessionId;
-	        this.traceId = traceId;
-	        this.tin = tin;
-	        this.hostname = hostname;
-	        this.eoi = eoi;
-	        this.ess = ess;
-	    }
-	
-	    public String getSignature() {
-	        return signature;
-	    }
-	
-	    public String getSessionId() {
-	        return sessionId;
-	    }
-	
-	    public long getTraceId() {
-	        return traceId;
-	    }
-	
-	    public long getTin() {
-	        return tin;
-	    }
-	
-	    public String getHostname() {
-	        return hostname;
-	    }
-	
-	    public int getEoi() {
-	        return eoi;
-	    }
-	
-	    public int getEss() {
-	        return ess;
-	    }
 	}
 	'''
 	

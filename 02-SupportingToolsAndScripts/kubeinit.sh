@@ -19,8 +19,7 @@ function getPorts() {
 for SVC_FOLDER in ${SVC_ARRAY[*]} 
 do
   SVC_NAME=`echo $SVC_FOLDER | cut -d'-' -f2`
-  kubectl create -f ${SVC_FOLDER}/kubernetes/service.yaml
-  kubectl create -f ${SVC_FOLDER}/kubernetes/controller.yaml
+  kubectl create -f ${SVC_FOLDER}/kubernetes.yaml
   sleep 3
   getPorts $SVC_NAME
   echo ""

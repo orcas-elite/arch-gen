@@ -65,12 +65,6 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
 		    <artifactId>spring-boot-starter-activemq</artifactId>
 		</dependency>
 		
-		<dependency>
-		    <groupId>org.hyperic</groupId>
-		    <artifactId>sigar</artifactId>
-		    <version>1.6.5.132-6</version>
-		</dependency>
-		
     </dependencies>
     
     <build>

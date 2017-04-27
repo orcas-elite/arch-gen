@@ -4,11 +4,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import kieker.monitoring.probe.spring.flow.RestOutInterceptor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
 
@@ -69,7 +69,7 @@ public abstract class MicroserviceType {
     }
 	
 	@RequestMapping(value = "/login", method = GET)
-	public String validateLogin() {
+	public ResponseEntity<String> validateLogin() {
 		
 		Integer delay = requestDelay("validateLogin");
 	try {
@@ -78,10 +78,10 @@ public abstract class MicroserviceType {
 		System.out.println("Exception occurred while trying to inject delay of " + delay + ". (" + ie.getMessage() + ")");
 	}
 		
-		return "Operation validateLogin executed successfully.";
+		return new ResponseEntity<String>("Operation validateLogin executed successfully.", HttpStatus.OK);
 	}
 	@RequestMapping(value = "/order", method = GET)
-	public String storeOrder() {
+	public ResponseEntity<String> storeOrder() {
 		
 		Integer delay = requestDelay("storeOrder");
 	try {
@@ -90,6 +90,6 @@ public abstract class MicroserviceType {
 		System.out.println("Exception occurred while trying to inject delay of " + delay + ". (" + ie.getMessage() + ")");
 	}
 		
-		return "Operation storeOrder executed successfully.";
+		return new ResponseEntity<String>("Operation storeOrder executed successfully.", HttpStatus.OK);
 	}
 }
