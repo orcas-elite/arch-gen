@@ -1,0 +1,5 @@
+com/example/logic/Microservice.class
+com/example/logic/MicroserviceType.class
+com/example/logic/MicroserviceRegistrationInfo.class
+com/example/logic/MicroserviceApplication.class
+com/example/logic/MicroserviceBaseInfo.class

@@ -1,0 +1,15 @@
+version: '2'
+
+services:
+        portal:
+                build: gen-portal/.
+                ports: 
+                        - "8080:8080"
+                links:
+                        - logic
+        logic:
+                build: gen-logic/.
+                links:
+                        - database
+        database:
+                build: gen-database/.
