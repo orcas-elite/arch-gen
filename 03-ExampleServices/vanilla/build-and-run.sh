@@ -15,4 +15,5 @@ cd gen-portal
 mvn clean package
 cd $CUR_DIR
 
-docker-compose up
+docker-compose up --build
+docker-compose down
